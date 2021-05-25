@@ -1,10 +1,10 @@
 ---
-layout: page
+layout: default
 title: About
 permalink: /about/
 ---
 
-Hi, my name is Martyn. I am currently the Computer Science Technical Lead at [We Predict Ltd](https://www.wepredict.com).
+Hi, my name is Martyn. I am currently the Computer Science Technical Lead at [We Predict](https://www.wepredict.com).
 
 My role covers a variety of different areas:
 

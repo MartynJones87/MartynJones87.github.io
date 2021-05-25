@@ -30,7 +30,7 @@ twitter_username: thurboman
 github_username:  MartynJones87
 
 # Build settings
-theme: minima
+theme: jekyll-theme-architect #minima
 plugins:
   - jekyll-feed
 
