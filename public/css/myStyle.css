@@ -1,0 +1,25 @@
+.sidebar img {
+    margin: 0;
+  }
+  
+  .sidebar-social a {
+    margin-right: 1rem;
+  }
+  
+  .sidebar-social img {
+    margin-right: 1rem;
+  }
+  
+  .sidebar-social a:hover,
+  .sidebar-social a:focus {
+    text-decoration: none;
+  }
+  
+  span.sidebar-nav-item.sidebar-social {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .sidebar-social a {
+    margin-right: 0;
+  }
