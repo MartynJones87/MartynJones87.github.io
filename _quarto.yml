@@ -1,0 +1,42 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Martyn Jones"
+  site-url: "https://martynjones87.github.io"
+  favicon: profile.jpg
+  navbar:
+      background: primary
+      search: true
+      logo: profile.jpg
+  sidebar:
+    style: floating
+    pinned: true
+    tools: 
+      - icon: github
+        href: https://github.com/MartynJones87
+      - icon: twitter
+        href: https://twitter.com/thurboman
+      - icon: linkedin
+        text: LinkedIn
+        href: https://www.linkedin.com/in/martyn-jones-dev/
+      - icon: stack-overflow
+        text: stackoverflow
+        href: https://stackoverflow.com/users/403424/martynjones87
+      - icon: rss
+        href: index.xml
+    contents:
+      - index.qmd
+      - about.qmd
+  page-footer: 
+    right: "Copyright 2022, Martyn Jones"
+  twitter-card:
+    creator: "@thurboman"
+format:
+  html:
+    theme: minty
+    css: styles.css
+
+
+

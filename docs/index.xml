@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Martyn Jones</title>
+<link>https://martynjones87.github.io/index.html</link>
+<atom:link href="https://martynjones87.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.2.262</generator>
+<lastBuildDate>Sun, 06 Nov 2022 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Selecting Random Samples From Large SQL Server Tables</title>
+  <dc:creator>Martyn Jones</dc:creator>
+  <link>https://martynjones87.github.io/posts/selecting-random-samples-from-large-sql-server-tables/index.html</link>
+  <description><![CDATA[ 
+
+
+
+<p>Recently, we needed to select 10,000 random rows from a table containing a billion rows.</p>
+<p>I couldn’t think of a better solution than ordering by <code>NEWID()</code> and selecting the <code>TOP (10000)</code> rows, but given the size of the table we’re working with, it was very slow and inefficient, so there had to be a better solution.</p>
+<p>Thankfully, <a href="https://www.brentozar.com">Brent Ozar</a> had a blog post to get us moving in the right direction: <a href="https://www.brentozar.com/archive/2018/03/get-random-row-large-table/">How to Get a Random Row from a Large Table</a>.</p>
+<p>As Brent’s post explains, the ordering by <code>NEWID()</code> is so slow because it calculates the NEWID value for every row in the table and then filters the return to the first 10,000 rows.</p>
+<p>Ultimately, the best solution from Brent’s post involves:</p>
+<ul>
+<li>Getting the largest ID value from the table.</li>
+<li>Generating a random number.</li>
+<li>Getting the modulo of that random number for the maximum ID value in the table.</li>
+<li>Selecting the record with that ID value.</li>
+</ul>
+<p>This does require a table with an integer ID column and also, is not guaranteed to return a record, if the randomly selected ID value doesn’t exist in the table.</p>
+<p>For our purposes though, we had a <code>BIGINT</code> identity column and the very vast majority of ID values between 1 and the max value did exist, so this was perfect.</p>
+<p>There is also a nod to our required use in Brent’s post:</p>
+<blockquote class="blockquote">
+<p>If you wanted 10 rows, you’d have to call code like this 10 times (or generate 10 random numbers and use an IN clause.)</p>
+</blockquote>
+<p>As we wanted 10,000 rows, we decided to: - Use a <a href="https://www.sqlservercentral.com/articles/the-numbers-or-tally-table-what-it-is-and-how-it-replaces-a-loop-1">Tally table</a>, (called <code>dbo.Numbers</code> in this example) to get the 10,000 rows. - Generate a <code>NEWID()</code> for each of those rows. - Store those 10,000 random numbers in a temporary table.</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><span class="co" style="color: #5E5E5E;">/* Get the highest ID in the table to use in the modulo calculation. */</span></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;">DECLARE</span> @MaxID BIGINT;</span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;">SELECT</span> @MaxID <span class="op" style="color: #5E5E5E;">=</span> <span class="fu" style="color: #4758AB;">MAX</span>(<span class="kw" style="color: #003B4F;">ID</span>)</span>
+<span id="cb1-4"><span class="kw" style="color: #003B4F;">FROM</span> dbo.TableToSample;</span>
+<span id="cb1-5"></span>
+<span id="cb1-6"><span class="co" style="color: #5E5E5E;">/* Create a table variable to store the randomly selected IDs. */</span></span>
+<span id="cb1-7"><span class="kw" style="color: #003B4F;">DECLARE</span> @RandomIDs <span class="kw" style="color: #003B4F;">TABLE</span> (</span>
+<span id="cb1-8">    SampleID <span class="dt" style="color: #AD0000;">INT</span> <span class="kw" style="color: #003B4F;">NOT</span> <span class="kw" style="color: #003B4F;">NULL</span>,</span>
+<span id="cb1-9">    RandomID BIGINT <span class="kw" style="color: #003B4F;">NOT</span> <span class="kw" style="color: #003B4F;">NULL</span>,</span>
+<span id="cb1-10">    <span class="kw" style="color: #003B4F;">PRIMARY</span> <span class="kw" style="color: #003B4F;">KEY</span> CLUSTERED (RandomID, SampleID)</span>
+<span id="cb1-11">);</span>
+<span id="cb1-12"></span>
+<span id="cb1-13"><span class="co" style="color: #5E5E5E;">/* To allow for any IDs no longer present in the table, select 10% more than needed at this point. */</span></span>
+<span id="cb1-14"><span class="kw" style="color: #003B4F;">INSERT</span> <span class="kw" style="color: #003B4F;">INTO</span> @RandomIDs (RandomID)</span>
+<span id="cb1-15"><span class="kw" style="color: #003B4F;">SELECT</span>  n.N <span class="kw" style="color: #003B4F;">AS</span> SampleID,</span>
+<span id="cb1-16">        <span class="fu" style="color: #4758AB;">ABS</span>(CHECKSUM(NEWID())) % MaxID <span class="kw" style="color: #003B4F;">AS</span> RandomID</span>
+<span id="cb1-17"><span class="kw" style="color: #003B4F;">FROM</span> dbo.Numbers <span class="kw" style="color: #003B4F;">AS</span> n</span>
+<span id="cb1-18"><span class="kw" style="color: #003B4F;">WHERE</span> n.N <span class="kw" style="color: #003B4F;">BETWEEN</span> <span class="dv" style="color: #AD0000;">1</span> <span class="kw" style="color: #003B4F;">AND</span> <span class="dv" style="color: #AD0000;">11000</span>;</span>
+<span id="cb1-19"></span>
+<span id="cb1-20"><span class="co" style="color: #5E5E5E;">/* Select from the table to be sampled inner joined with the temporary table to only return rows </span></span>
+<span id="cb1-21"><span class="co" style="color: #5E5E5E;"> * with a randomly selected ID value, and only keep the first 10,000 matches. */</span></span>
+<span id="cb1-22"><span class="kw" style="color: #003B4F;">SELECT</span> TOP (<span class="dv" style="color: #AD0000;">10000</span>)</span>
+<span id="cb1-23">    tts.<span class="kw" style="color: #003B4F;">ID</span>, </span>
+<span id="cb1-24">    tts.Col1, </span>
+<span id="cb1-25">    tts.Col2</span>
+<span id="cb1-26"><span class="kw" style="color: #003B4F;">FROM</span> dbo.TableToSample <span class="kw" style="color: #003B4F;">AS</span> tts </span>
+<span id="cb1-27"><span class="kw" style="color: #003B4F;">INNER</span> <span class="kw" style="color: #003B4F;">JOIN</span> @RandomIDs <span class="kw" style="color: #003B4F;">AS</span> rnd</span>
+<span id="cb1-28">    <span class="kw" style="color: #003B4F;">ON</span> tts.<span class="kw" style="color: #003B4F;">ID</span> <span class="op" style="color: #5E5E5E;">=</span> rnd.RandomID</span>
+<span id="cb1-29"><span class="kw" style="color: #003B4F;">ORDER</span> <span class="kw" style="color: #003B4F;">BY</span> rnd.SampleID;</span></code></pre></div>
+<p>Ultimately, the performance of this approach is significantly faster than the alternative and requires far less IO and CPU time. It solved the problem and is something that has proved useful on a few occasions since.</p>
+
+
+
+ ]]></description>
+  <category>sql-server</category>
+  <guid>https://martynjones87.github.io/posts/selecting-random-samples-from-large-sql-server-tables/index.html</guid>
+  <pubDate>Sun, 06 Nov 2022 00:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>
