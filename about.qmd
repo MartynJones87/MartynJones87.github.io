@@ -7,6 +7,9 @@ about:
     - icon: github
       text: Github
       href: https://github.com/MartynJones87
+    - icon: mastodon
+      text: mastodon
+      href: https://mastodonapp.uk/@thurboman
     - icon: twitter
       text: Twitter
       href: https://twitter.com/thurboman

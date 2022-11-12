@@ -16,6 +16,9 @@ website:
     tools: 
       - icon: github
         href: https://github.com/MartynJones87
+      - icon: mastodon
+        text: mastodon
+        href: https://mastodonapp.uk/@thurboman
       - icon: twitter
         href: https://twitter.com/thurboman
       - icon: linkedin
