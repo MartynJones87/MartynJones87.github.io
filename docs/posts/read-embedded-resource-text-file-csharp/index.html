@@ -224,7 +224,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In a C# console app that I was developing, I had a set of text files that I needed to use the contents of at runtime.</p>
 <p>I did not want to take the contents of the files and make them C# source code, as that made it more complicated for our Data Scientists, who populate the text files, to update their contents over time.</p>
 <p>Initially, I added the text files to the project and set them to copy to the output on build. This was a bit messy with how to read the files back in for unit tests vs normal running.</p>
-<p>I did try out the[] TxtToListGenerator](https://github.com/musictopia2/TxtToListGenerator) source generator, but, one of the files is over 300,000 lines and this did cause the build to hang, so I went for a less complex solution.</p>
+<p>I did try out the <a href="https://github.com/musictopia2/TxtToListGenerator">TxtToListGenerator</a> source generator, but, one of the files is over 300,000 lines and this did cause the build to hang, so I went for a less complex solution.</p>
 <p>I decided to set the text files as embedded resources and then read them from the assembly at runtime.</p>
 <p>With the files added to the project as embedded resources, the code to read them at runtime is:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> System<span class="op">;</span></span>

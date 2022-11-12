@@ -11,7 +11,7 @@ I did not want to take the contents of the files and make them C# source code, a
 
 Initially, I added the text files to the project and set them to copy to the output on build. This was a bit messy with how to read the files back in for unit tests vs normal running.
 
-I did try out the[] TxtToListGenerator](https://github.com/musictopia2/TxtToListGenerator) source generator, but, one of the files is over 300,000 lines and this did cause the build to hang, so I went for a less complex solution.
+I did try out the [TxtToListGenerator](https://github.com/musictopia2/TxtToListGenerator) source generator, but, one of the files is over 300,000 lines and this did cause the build to hang, so I went for a less complex solution.
 
 I decided to set the text files as embedded resources and then read them from the assembly at runtime.
 
