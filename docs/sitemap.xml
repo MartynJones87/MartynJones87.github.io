@@ -2,14 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://martynjones87.github.io/about.html</loc>
-    <lastmod>2022-11-06T22:00:33.286Z</lastmod>
+    <lastmod>2022-11-12T15:46:11.670Z</lastmod>
   </url>
   <url>
     <loc>https://martynjones87.github.io/index.html</loc>
-    <lastmod>2022-11-06T22:00:34.519Z</lastmod>
+    <lastmod>2022-11-12T15:46:13.118Z</lastmod>
+  </url>
+  <url>
+    <loc>https://martynjones87.github.io/posts/read-embedded-resource-text-file-c#/index.html</loc>
+    <lastmod>2022-11-12T15:46:14.001Z</lastmod>
   </url>
   <url>
     <loc>https://martynjones87.github.io/posts/selecting-random-samples-from-large-sql-server-tables/index.html</loc>
-    <lastmod>2022-11-06T22:00:35.379Z</lastmod>
+    <lastmod>2022-11-12T15:46:14.826Z</lastmod>
   </url>
 </urlset>

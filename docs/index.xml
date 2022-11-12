@@ -10,7 +10,52 @@
 <atom:link href="https://martynjones87.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.262</generator>
-<lastBuildDate>Sun, 06 Nov 2022 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 12 Nov 2022 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Read Embedded Resource Text File C#</title>
+  <dc:creator>Martyn Jones</dc:creator>
+  <link>https://martynjones87.github.io/posts/read-embedded-resource-text-file-c#/index.html</link>
+  <description><![CDATA[ 
+
+
+
+<p>In a C# console app that I was developing, I had a set of text files that I needed to use the contents of at runtime.</p>
+<p>I did not want to take the contents of the files and make them C# source code, as that made it more complicated for our Data Scientists, who populate the text files, to update their contents over time.</p>
+<p>Initially, I added the text files to the project and set them to copy to the output on build. This was a bit messy with how to read the files back in for unit tests vs normal running.</p>
+<p>I did try out the[] TxtToListGenerator](https://github.com/musictopia2/TxtToListGenerator) source generator, but, one of the files is over 300,000 lines and this did cause the build to hang, so I went for a less complex solution.</p>
+<p>I decided to set the text files as embedded resources and then read them from the assembly at runtime.</p>
+<p>With the files added to the project as embedded resources, the code to read them at runtime is:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb1-1"><span class="kw" style="color: #003B4F;">using</span> System<span class="op" style="color: #5E5E5E;">;</span></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;">using</span> System<span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">IO</span><span class="op" style="color: #5E5E5E;">;</span></span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;">using</span> System<span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">Linq</span><span class="op" style="color: #5E5E5E;">;</span></span>
+<span id="cb1-4"><span class="kw" style="color: #003B4F;">using</span> System<span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">Reflection</span><span class="op" style="color: #5E5E5E;">;</span></span>
+<span id="cb1-5"></span>
+<span id="cb1-6"><span class="co" style="color: #5E5E5E;">/// </span><span class="kw" style="color: #003B4F;">&lt;summary&gt;</span></span>
+<span id="cb1-7"><span class="co" style="color: #5E5E5E;">/// </span><span class="kw" style="color: #003B4F;">&lt;/summary&gt;</span></span>
+<span id="cb1-8"><span class="co" style="color: #5E5E5E;">/// </span><span class="kw" style="color: #003B4F;">&lt;param</span><span class="ot" style="color: #003B4F;"> name=</span><span class="dt" style="color: #AD0000;">"resourceFileName"</span><span class="kw" style="color: #003B4F;">&gt;</span><span class="co" style="color: #5E5E5E;">The name of an embedded resource text file to read in.</span><span class="kw" style="color: #003B4F;">&lt;/param&gt;</span></span>
+<span id="cb1-9"><span class="kw" style="color: #003B4F;">private</span> <span class="dt" style="color: #AD0000;">string</span><span class="op" style="color: #5E5E5E;">[]</span> <span class="fu" style="color: #4758AB;">ReadResourceTextLines</span><span class="op" style="color: #5E5E5E;">(</span><span class="dt" style="color: #AD0000;">string</span> resourceFileName<span class="op" style="color: #5E5E5E;">)</span></span>
+<span id="cb1-10"><span class="op" style="color: #5E5E5E;">{</span></span>
+<span id="cb1-11">    <span class="dt" style="color: #AD0000;">var</span> assembly <span class="op" style="color: #5E5E5E;">=</span> Assembly<span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">GetExecutingAssembly</span><span class="op" style="color: #5E5E5E;">();</span></span>
+<span id="cb1-12"></span>
+<span id="cb1-13">    <span class="dt" style="color: #AD0000;">var</span> resourcePath <span class="op" style="color: #5E5E5E;">=</span> assembly</span>
+<span id="cb1-14">        <span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">GetManifestResourceNames</span><span class="op" style="color: #5E5E5E;">()</span></span>
+<span id="cb1-15">        <span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">Single</span><span class="op" style="color: #5E5E5E;">(</span>str <span class="op" style="color: #5E5E5E;">=&gt;</span> str<span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">EndsWith</span><span class="op" style="color: #5E5E5E;">(</span>resourceFileName<span class="op" style="color: #5E5E5E;">));</span></span>
+<span id="cb1-16"></span>
+<span id="cb1-17">    <span class="kw" style="color: #003B4F;">using</span> <span class="dt" style="color: #AD0000;">var</span> stream <span class="op" style="color: #5E5E5E;">=</span> assembly<span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">GetManifestResourceStream</span><span class="op" style="color: #5E5E5E;">(</span>resourcePath<span class="op" style="color: #5E5E5E;">);</span></span>
+<span id="cb1-18">    <span class="kw" style="color: #003B4F;">using</span> <span class="dt" style="color: #AD0000;">var</span> reader <span class="op" style="color: #5E5E5E;">=</span> <span class="kw" style="color: #003B4F;">new</span> <span class="fu" style="color: #4758AB;">StreamReader</span><span class="op" style="color: #5E5E5E;">(</span>stream<span class="op" style="color: #5E5E5E;">);</span></span>
+<span id="cb1-19"></span>
+<span id="cb1-20">    <span class="kw" style="color: #003B4F;">return</span> reader</span>
+<span id="cb1-21">        <span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">ReadToEnd</span><span class="op" style="color: #5E5E5E;">()</span></span>
+<span id="cb1-22">        <span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">Split</span><span class="op" style="color: #5E5E5E;">(</span>Environment<span class="op" style="color: #5E5E5E;">.</span><span class="fu" style="color: #4758AB;">NewLine</span><span class="op" style="color: #5E5E5E;">);</span></span>
+<span id="cb1-23"><span class="op" style="color: #5E5E5E;">}</span></span></code></pre></div>
+
+
+
+ ]]></description>
+  <category>c#</category>
+  <guid>https://martynjones87.github.io/posts/read-embedded-resource-text-file-c#/index.html</guid>
+  <pubDate>Sat, 12 Nov 2022 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Selecting Random Samples From Large SQL Server Tables</title>
   <dc:creator>Martyn Jones</dc:creator>
